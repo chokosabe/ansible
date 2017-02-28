@@ -247,15 +247,12 @@ from ansible.module_utils.basic import *
 from ansible.module_utils.ec2 import *
 from ansible.module_utils.six import iteritems
 
-#log.basicConfig(filename='/tmp/ansible_ec2_asg.log', level=log.DEBUG, format='%(asctime)s: %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
-
 try:
-    import boto3
     import botocore
-
-    HAS_BOTO_3 = True
 except ImportError:
-    HAS_BOTO_3 = False
+    pass  # will be detected by imported HAS_BOTO3
+
+#log.basicConfig(filename='/tmp/ansible_ec2_asg.log', level=log.DEBUG, format='%(asctime)s: %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 ASG_ATTRIBUTES = ('AvailabilityZones', 'DefaultCooldown', 'DesiredCapacity',
                   'HealthCheckGracePeriod', 'HealthCheckType', 'LaunchConfigurationName',
@@ -539,7 +536,7 @@ def create_autoscaling_group(connection, module):
 
     asg_tags = []
     for tag in set_tags:
-        for k,v in iteritems(tag):
+        for k,v in tag.items():
             if k !='propagate_at_launch':
                 asg_tags.append(dict(Key=k,
                                      Value=v,
@@ -1080,7 +1077,7 @@ def main():
         mutually_exclusive = [['replace_all_instances', 'replace_instances']]
     )
 
-    if not HAS_BOTO_3:
+    if not HAS_BOTO3:
         module.fail_json(msg='boto3 required for this module')
 
     state = module.params.get('state')
